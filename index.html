@@ -1,1 +1,518 @@
+<!DOCTYPE html>
+<!-- 声明文档类型为 HTML5 -->
+<html>
+<head>
+    <!-- 定义字符编码为 UTF-8，确保页面能正确显示各种字符 -->
+    <meta charset="UTF-8">
+    <!-- 设置视口属性，使页面在不同设备上能自适应显示 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 设置页面的标题，显示在浏览器标签栏 -->
+    <title>消毒药品配比计算器</title>
+    <!-- 页面的样式部分，使用 CSS 来美化页面 -->
+    <style>
+        /* 定义选项卡容器的样式 */
+        .tabs {
+            /* 使用 flex 布局，让选项卡按钮水平排列 */
+            display: flex;
+            /* 让选项卡按钮在水平方向上居中显示 */
+            justify-content: center;
+            /* 选项卡容器底部的外边距 */
+            margin-bottom: 20px;
+            /* 选项卡按钮之间的间距 */
+            gap: 5px;
+        }
 
+        /* 定义选项卡按钮的样式 */
+        .tab-btn {
+            /* 按钮内边距 */
+            padding: 10px 20px;
+            /* 鼠标悬停时显示手型指针 */
+            cursor: pointer;
+            /* 按钮边框样式 */
+            border: 1px solid #ddd;
+            /* 按钮背景颜色 */
+            background: #f5f5f5;
+            /* 按钮顶部圆角 */
+            border-radius: 5px 5px 0 0;
+        }
+
+        /* 定义激活状态的选项卡按钮样式 */
+        .tab-btn.active {
+            /* 激活按钮背景颜色 */
+            background: #007bff;
+            /* 激活按钮文字颜色 */
+            color: white;
+            /* 激活按钮边框颜色 */
+            border-color: #007bff;
+        }
+
+        /* 定义选项卡内容区域的样式 */
+        .tab-content {
+            /* 默认隐藏选项卡内容 */
+            display: none;
+            /* 内容区域内边距 */
+            padding: 20px;
+            /* 内容区域边框样式 */
+            border: 1px solid #ddd;
+        }
+
+        /* 定义激活状态的选项卡内容区域样式 */
+        .tab-content.active {
+            /* 显示激活的选项卡内容 */
+            display: block;
+        }
+
+        /* 当屏幕宽度小于等于 768px 时的样式，适用于移动端 */
+        @media screen and (max-width: 768px) {
+            /* 计算器容器的样式调整 */
+            .calculator {
+                /* 减小内边距 */
+                padding: 10px;
+                /* 减小外边距 */
+                margin: 10px;
+            }
+
+            /* 输入框样式调整 */
+            input {
+                /* 输入框宽度为 100% */
+                width: 100%;
+                /* 输入框内边距 */
+                padding: 12px;
+                /* 输入框文字大小 */
+                font-size: 16px;
+            }
+
+            /* 选项卡按钮样式调整 */
+            .tab-btn {
+                /* 按钮内边距 */
+                padding: 12px;
+                /* 按钮文字大小 */
+                font-size: 14px;
+                /* 按钮宽度自适应 */
+                flex: 1;
+                /* 按钮文字居中显示 */
+                text-align: center;
+            }
+        }
+
+        /* 当屏幕宽度大于 769px 时的样式，适用于桌面端 */
+        @media screen and (min-width: 769px) {
+            /* 输入框宽度 */
+            input {
+                width: 280px;
+            }
+        }
+
+        /* 按钮样式 */
+        button {
+            /* 按钮内边距 */
+            padding: 12px 24px;
+            /* 按钮文字大小 */
+            font-size: 16px;
+            /* 按钮外边距 */
+            margin: 10px 5px;
+            /* 去除按钮边框 */
+            border: none;
+            /* 按钮圆角 */
+            border-radius: 5px;
+            /* 鼠标悬停时显示手型指针 */
+            cursor: pointer;
+            /* 按钮状态变化时的过渡效果 */
+            transition: all 0.3s;
+        }
+
+        /* 提交按钮样式 */
+        button[type="submit"] {
+            /* 提交按钮背景颜色 */
+            background: #007bff;
+            /* 提交按钮文字颜色 */
+            color: white;
+        }
+
+        /* 提交按钮悬停时的样式 */
+        button[type="submit"]:hover {
+            /* 悬停时背景颜色变深 */
+            background: #0056b3;
+        }
+
+        /* 普通按钮样式 */
+        button[type="button"] {
+            /* 普通按钮背景颜色 */
+            background: #81ac7e;
+            /* 普通按钮文字颜色 */
+            color: white;
+        }
+
+        /* 普通按钮悬停时的样式 */
+        button[type="button"]:hover {
+            /* 悬停时背景颜色不变 */
+            background: #81ac7e;
+        }
+
+        /* 计算器容器全局样式 */
+        .calculator {
+            /* 字体样式 */
+            font-family: Arial, sans-serif;
+            /* 容器阴影效果 */
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            /* 容器圆角 */
+            border-radius: 10px;
+        }
+
+        /* 表单组样式 */
+        .form-group {
+            /* 表单组底部外边距 */
+            margin-bottom: 20px;
+        }
+
+        /* 标签样式 */
+        label {
+            /* 标签文字加粗 */
+            font-weight: 500;
+            /* 标签文字颜色 */
+            color: #333;
+            /* 标签文字大小 */
+            font-size: 15px;
+        }
+
+        /* 计算结果显示区域样式 */
+        .result {
+            /* 结果文字大小 */
+            font-size: 16px;
+            /* 结果文字行高 */
+            line-height: 1.6;
+            /* 结果区域背景颜色 */
+            background: #f8f9fa;
+            /* 结果区域左边框样式 */
+            border-left: 4px solid #007bff;
+            /* 新增：让结果文本居中 */
+            text-align: center;
+            /* 新增：让结果区域在水平方向上居中 */
+            margin: 0 auto; 
+            /* 可根据需要设置结果区域的宽度 */
+            width: fit-content; 
+        }
+
+        /* 标题样式 */
+        h2 {
+            /* 标题居中显示 */
+            text-align: center;
+            /* 标题底部外边距 */
+            margin-bottom: 30px;
+            /* 标题文字颜色 */
+            color: #2c3e50;
+            /* 标题文字大小 */
+            font-size: 24px;
+        }
+
+        /* 表单组样式调整 */
+        .form-group {
+            /* 使用 flex 布局，让标签和输入框水平排列 */
+            display: flex;
+            /* 标签和输入框垂直居中对齐 */
+            align-items: center;
+            /* 表单组底部外边距 */
+            margin-bottom: 20px;
+            /* 标签和输入框之间的间距 */
+            gap: 15px;
+            /* 新增：使表单组内容水平居中 */
+            justify-content: center; 
+        }
+
+        /* 按钮组样式 */
+        .button-group {
+            /* 新增：使用 flex 布局 */
+            display: flex; 
+            /* 新增：使按钮组内容水平居中 */
+            justify-content: center; 
+        }
+
+        /* 标签样式调整 */
+        label {
+            /* 标签宽度 */
+            width: 180px;
+            /* 标签文字右对齐 */
+            text-align: right;
+            /* 去除标签底部外边距 */
+            margin-bottom: 0;
+            /* 标签文字大小 */
+            font-size: 15px;
+        }
+
+        /* 输入框样式调整 */
+        input {
+            /* 输入框宽度自适应 */
+            flex: 1;
+            /* 输入框最大宽度 */
+            max-width: 280px;
+            /* 输入框内边距 */
+            padding: 10px;
+            /* 输入框边框样式 */
+            border: 1px solid #ddd;
+            /* 输入框圆角 */
+            border-radius: 4px;
+        }
+
+        /* 当屏幕宽度小于等于 768px 时的表单组样式调整，适用于移动端 */
+        @media screen and (max-width: 768px) {
+            /* 表单组样式调整为垂直排列 */
+            .form-group {
+                /* 垂直排列 */
+                flex-direction: column;
+                /* 内容左对齐 */
+                align-items: flex-start;
+            }
+
+            /* 标签样式调整 */
+            label {
+                /* 标签宽度为 100% */
+                width: 100%;
+                /* 标签文字左对齐 */
+                text-align: left;
+            }
+
+            /* 输入框样式调整 */
+            input {
+                /* 输入框宽度为 100% */
+                width: 100%;
+                /* 输入框最大宽度为 100% */
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 计算器容器 -->
+    <div class="calculator">
+        <!-- 计算器标题 -->
+        <h2>消毒药品配比计算器</h2>
+
+        <!-- 选项卡按钮容器 -->
+        <div class="tabs">
+            <!-- 84 消毒液选项卡按钮，默认激活 -->
+            <div class="tab-btn active" onclick="showTab('84')">84消毒液</div>
+            <!-- 消毒片选项卡按钮 -->
+            <div class="tab-btn" onclick="showTab('Tablet')">消毒片</div>
+            <!-- 消毒粉剂选项卡按钮 -->
+            <div class="tab-btn" onclick="showTab('Powder')">消毒粉剂</div>
+        </div>
+
+        <!-- 84 消毒液选项卡内容，默认激活 -->
+        <div id="tab84" class="tab-content active">
+            <!-- 84 消毒液计算表单 -->
+            <form id="form84" onsubmit="return calculate84(event)">
+                <!-- 原液浓度输入表单组 -->
+                <div class="form-group">
+                    <!-- 原液浓度标签 -->
+                    <label>原液浓度（%）：</label>
+                    <!-- 原液浓度输入框，只能输入数字，步长为 0.1，必填项 -->
+                    <input type="number" step="0.1" id="concentration84" required>
+                </div>
+                <!-- 目标浓度输入表单组 -->
+                <div class="form-group">
+                    <!-- 目标浓度标签 -->
+                    <label>目标浓度（mg/L）：</label>
+                    <!-- 目标浓度输入框，只能输入数字，步长为 0.1，必填项 -->
+                    <input type="number" step="0.1" id="target84" required>
+                </div>
+                <!-- 配药量输入表单组 -->
+                <div class="form-group">
+                    <!-- 配药量标签 -->
+                    <label>配药量（L）：</label>
+                    <!-- 配药量输入框，只能输入数字，步长为 0.1，必填项 -->
+                    <input type="number" step="0.1" id="volume84" required>
+                </div>
+                <!-- 按钮容器 -->
+                <div class="button-group">
+                    <!-- 提交按钮，点击后触发计算函数 -->
+                    <button type="submit">计算</button>
+                    <!-- 重置按钮，点击后重置表单 -->
+                    <button type="button" onclick="resetForm('form84')">重置</button>
+                </div>
+                <!-- 计算结果显示区域 -->
+                <div class="result" id="result84"></div>
+            </form>
+        </div>
+
+        <!-- 消毒片选项卡内容 -->
+        <div id="tabTablet" class="tab-content">
+            <!-- 消毒片计算表单 -->
+            <form id="formTablet" onsubmit="return calculateTablet(event)">
+                <!-- 每片有效含量输入表单组 -->
+                <div class="form-group">
+                    <!-- 每片有效含量标签 -->
+                    <label>每片有效含量（mg/片）：</label>
+                    <!-- 每片有效含量输入框，只能输入数字，步长为 0.1，必填项 -->
+                    <input type="number" step="0.1" id="mgTablet" required>
+                </div>
+                <!-- 目标浓度输入表单组 -->
+                <div class="form-group">
+                    <!-- 目标浓度标签 -->
+                    <label>目标浓度（mg/L）：</label>
+                    <!-- 目标浓度输入框，只能输入数字，步长为 0.1，必填项 -->
+                    <input type="number" step="0.1" id="targetTablet" required>
+                </div>
+                <!-- 配药量输入表单组 -->
+                <div class="form-group">
+                    <!-- 配药量标签 -->
+                    <label>配药量（L）：</label>
+                    <!-- 配药量输入框，只能输入数字，步长为 0.1，必填项 -->
+                    <input type="number" step="0.1" id="volumeTablet" required>
+                </div>
+                <!-- 按钮容器 -->
+                <div class="button-group">
+                    <!-- 提交按钮，点击后触发计算函数 -->
+                    <button type="submit">计算</button>
+                    <!-- 重置按钮，点击后重置表单 -->
+                    <button type="button" onclick="resetForm('formTablet')">重置</button>
+                </div>
+                <!-- 计算结果显示区域 -->
+                <div class="result" id="resultTablet"></div>
+            </form>
+        </div>
+
+        <!-- 消毒粉剂选项卡内容 -->
+        <div id="tabPowder" class="tab-content">
+            <!-- 消毒粉剂计算表单 -->
+            <form id="formPowder" onsubmit="return calculatePowder(event)">
+                <!-- 粉剂有效浓度输入表单组 -->
+                <div class="form-group">
+                    <!-- 粉剂有效浓度标签 -->
+                    <label>粉剂有效浓度（%）：</label>
+                    <!-- 粉剂有效浓度输入框，只能输入数字，步长为 0.1，必填项 -->
+                    <input type="number" step="0.1" id="concentrationPowder" required>
+                </div>
+                <!-- 目标浓度输入表单组 -->
+                <div class="form-group">
+                    <!-- 目标浓度标签 -->
+                    <label>目标浓度（mg/L）：</label>
+                    <!-- 目标浓度输入框，只能输入数字，步长为 0.1，必填项 -->
+                    <input type="number" step="0.1" id="targetPowder" required>
+                </div>
+                <!-- 配药量输入表单组 -->
+                <div class="form-group">
+                    <!-- 配药量标签 -->
+                    <label>配药量（L）：</label>
+                    <!-- 配药量输入框，只能输入数字，步长为 0.1，必填项 -->
+                    <input type="number" step="0.1" id="volumePowder" required>
+                </div>
+                <!-- 按钮容器 -->
+                <div class="button-group">
+                    <!-- 提交按钮，点击后触发计算函数 -->
+                    <button type="submit">计算</button>
+                    <!-- 重置按钮，点击后重置表单 -->
+                    <button type="button" onclick="resetForm('formPowder')">重置</button>
+                </div>
+                <!-- 计算结果显示区域 -->
+                <div class="result" id="resultPowder"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 页面的 JavaScript 脚本部分 -->
+    <script>
+        /**
+         * 显示指定名称的选项卡内容
+         * @param {string} tabName - 选项卡的名称，如 '84', 'Tablet', 'Powder'
+         */
+        function showTab(tabName) {
+            // 隐藏所有选项卡内容
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            // 移除所有选项卡按钮的激活状态
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            // 显示指定名称的选项卡内容
+            document.getElementById(`tab${tabName}`).classList.add('active');
+            // 为当前点击的选项卡按钮添加激活状态
+            event.target.classList.add('active');
+        }
+
+        /**
+         * 计算 84 消毒液的配比
+         * @param {Event} e - 表单提交事件对象
+         * @returns {boolean} - 阻止表单默认提交行为
+         */
+        function calculate84(e) {
+            // 阻止表单默认提交行为
+            e.preventDefault();
+            // 获取原液浓度输入框的值，并转换为浮点数
+            const concentration = parseFloat(document.getElementById('concentration84').value);
+            // 获取目标浓度输入框的值，并转换为浮点数
+            const target = parseFloat(document.getElementById('target84').value);
+            // 获取配药量输入框的值，并转换为浮点数
+            const volume = parseFloat(document.getElementById('volume84').value);
+            // 将目标浓度从 mg/L 转换为百分比浓度
+            const targetPercent = target / 1000;
+            // 计算所需 84 消毒液的体积（ml）
+            const pureML = (targetPercent * volume * 100) / concentration;
+            // 计算所需水的体积（ml）
+            const waterML = volume * 1000 - pureML;
+            // 将计算结果显示在结果区域
+            document.getElementById('result84').innerHTML = 
+                `需要添加 ${pureML.toFixed(0)}ml 84消毒液<br>
+                 需要添加 ${waterML.toFixed(0)}ml 水`;
+            return false;
+        }
+
+        /**
+         * 计算消毒片的配比
+         * @param {Event} e - 表单提交事件对象
+         * @returns {boolean} - 阻止表单默认提交行为
+         */
+        function calculateTablet(e) {
+            // 阻止表单默认提交行为
+            e.preventDefault();
+            // 获取每片有效含量输入框的值，并转换为浮点数
+            const mgPerTablet = parseFloat(document.getElementById('mgTablet').value);
+            // 获取目标浓度输入框的值，并转换为浮点数
+            const target = parseFloat(document.getElementById('targetTablet').value);
+            // 获取配药量输入框的值，并转换为浮点数
+            const volume = parseFloat(document.getElementById('volumeTablet').value);
+            // 计算所需的总有效含量（mg）
+            const totalMg = target * volume;
+            // 计算所需消毒片的数量，向上取整
+            const tablets = Math.ceil(totalMg / mgPerTablet);
+            // 将计算结果显示在结果区域
+            document.getElementById('resultTablet').textContent = 
+                `需要添加 ${tablets} 片消毒片`;
+            return false;
+        }
+
+        /**
+         * 计算消毒粉剂的配比
+         * @param {Event} e - 表单提交事件对象
+         * @returns {boolean} - 阻止表单默认提交行为
+         */
+        function calculatePowder(e) {
+            // 阻止表单默认提交行为
+            e.preventDefault();
+            // 获取粉剂有效浓度输入框的值，并转换为浮点数
+            const concentration = parseFloat(document.getElementById('concentrationPowder').value);
+            // 获取目标浓度输入框的值，并转换为浮点数
+            const target = parseFloat(document.getElementById('targetPowder').value);
+            // 获取配药量输入框的值，并转换为浮点数
+            const volume = parseFloat(document.getElementById('volumePowder').value);
+            // 计算所需消毒粉剂的质量（g）
+            const powderG = (target * volume) / (concentration * 10);
+            // 将计算结果显示在结果区域
+            document.getElementById('resultPowder').textContent = 
+                `需要添加 ${powderG.toFixed(0)}g 消毒粉剂`;
+            return false;
+        }
+
+        /**
+         * 重置指定表单的内容和结果显示区域
+         * @param {string} formId - 表单的 ID
+         */
+        function resetForm(formId) {
+            // 重置指定表单的内容
+            document.getElementById(formId).reset();
+            // 清空指定表单对应的结果显示区域
+            document.getElementById(`result${formId.slice(4)}`).textContent = '';
+        }
+    </script>
+</body>
+</html>
